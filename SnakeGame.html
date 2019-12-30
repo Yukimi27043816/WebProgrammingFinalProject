@@ -1,0 +1,367 @@
+﻿<!DOCTYPE HTML>
+<html lang="zh-en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Eating Snake</title>
+    <script src="https://d3js.org/d3.v3.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+    <style type="text/CSS">
+        @charset "utf-8";
+        button {
+            padding: 6px 12px;
+            font-size: 14px;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin: 5px;
+        }
+        html, body, div, canvas, span {
+            padding: 0;
+            margin: 0;
+        }
+
+        body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        #cav {
+        }
+
+        #end {
+            display: none;
+            width: 100%;
+            font-size: 30px;
+            color: #000;
+            text-align: center;
+            box-sizing: border-box;
+            margin-top: 50px;
+        }
+
+            #end .gold {
+            }
+
+                #end .gold span {
+                    display: inline-block;
+                    width: 100px;
+                    text-align: center;
+                    font-size: 40px;
+                    color: #00f;
+                }
+
+            #end .retry {
+                display: inline-block;
+                margin-top: 30px;
+                text-align: center;
+                cursor: pointer;
+                color: #00f;
+            }
+    </style>
+    <script src="https://code.jquery.com/jquery-2.1.0.js"></script>
+    <script>
+        var score = 0;
+        var limit = 5;
+        var bgImg = new Image();
+        bgImg.src = "./img/Snake/SnakeBG.png";
+        var leftImg = new Image();
+        leftImg.src = "./img/Heroine/walk_1.png";
+        var rightImg = new Image();
+        rightImg.src = "./img/Heroine/walk_3.png";
+        var topImg = new Image();
+        topImg.src = "./img/Heroine/walk_0.png";
+        var bottomImg = new Image();
+        bottomImg.src = "./img/Heroine/walk_2.png";
+        var bodyImg = new Image();
+        bodyImg.src = "./img/Snake/ItemBack.png";
+        var foodImg = new Image();
+        foodImg.src = "./img/Snake/Item.png";
+        var cutImg = new Image();
+        cutImg.src = "./img/Snake/Item.png";
+
+        function Snake() {
+            this.canvas = $('#cav').get(0).getContext('2d');
+            this.step = 40;//步長
+            // this.width = parseInt(($(window).width()/this.step)) * this.step ;//畫布寬度
+            // this.height = parseInt(($(window).height()/this.step)) * this.step ;//畫布高度
+            this.width =800;
+            this.height = 800;
+            this.stepW = this.width / this.step;
+            this.stepH = this.height / this.step;
+            this.snakeArr = [];//蛇身數組
+            this.foodArr = [];//食物數組
+            this.direction = 'left';//默認方向
+            this.speed = 200;//移動速度
+            this.eatNumber = 0;//吃到食物的數量
+            //調整畫板位置
+            //$('#cav').css('margin-top',($(window).width()-this.width)/2 + 'px').css('margin-left',($(window).height()-this.height)/2 + 'px');
+
+            //1.繪製遊俠元素
+            this.draw = function () {
+                //a.畫背景
+                this.canvas.drawImage(bgImg, 0, 0, this.width, this.height);
+                //b.畫蛇
+                this.drawSnake();
+                //c.畫食物
+                this.drawFood();
+            }
+            this.drawFood = function () {
+                if (this.foodArr.length != 0) { //有食物的情況
+                    this.canvas.drawImage(this.foodArr[0].img, this.foodArr[0].x * this.step, this.foodArr[0].y * this.step, this.step, this.step);
+                    return;
+                }
+
+                var x = Math.floor(Math.random() * this.stepW);
+                var y = Math.floor(Math.random() * this.stepH);
+				//console.log(x);
+				//console.log(y);
+				//if(x==0||x==19||y=0||y==19){this.drawFood();}
+                var snakeLength = this.snakeArr.length;
+                for (var i = 0; i < snakeLength; i++) {//和蛇身重合就重新執行
+                    if (this.snakeArr[i].x == x && this.snakeArr[i].y == y) {
+                        this.drawFood();
+                        break;
+                    }
+                }
+
+                //沒和蛇身重合
+                if (this.eatNumber >= 30 && this.eatNumber % Math.floor((Math.random() * 10)) == 0 && this.snakeArr.length > 8) {
+                    this.foodArr[0] = {
+                        x: x,
+                        y: y,
+                        img: cutImg,
+                        cut: 'true'
+                    }
+                } else {
+                    this.foodArr[0] = {
+                        x: x,
+                        y: y,
+                        img: foodImg,
+                        cut: 'false'
+                    }
+                }
+                this.canvas.drawImage(this.foodArr[0].img, this.foodArr[0].x * this.step, this.foodArr[0].y * this.step, this.step, this.step);
+            }
+            this.drawSnake = function () {
+                //初始化蛇身
+                if (this.snakeArr.length == 0) {
+                    for (var i = 0; i < 5; i++) {
+                        this.snakeArr[i] = {
+                            x: parseInt(this.stepW / 2) + i - 2,
+                            y: parseInt(this.stepH / 2),
+                            img: bodyImg,
+                            direction: 'left',
+                        }
+                    }
+                    this.snakeArr[0].img = leftImg;
+                }
+
+                //繪製蛇身
+                var snakeLength = this.snakeArr.length;
+                switch (this.direction) {
+                    case 'left':
+                        this.snakeArr[0].img = leftImg;
+                        break;
+                    case 'right':
+                        this.snakeArr[0].img = rightImg;
+                        break;
+                    case 'top':
+                        this.snakeArr[0].img = topImg;
+                        break;
+                    case 'bottom':
+                        this.snakeArr[0].img = bottomImg;
+                        break;
+                }
+
+                for (var i = 0; i < snakeLength; i++) {
+                    var snakeImg = this.snakeArr[i];
+                    this.canvas.drawImage(
+                        snakeImg.img,
+                        snakeImg.x * this.step,
+                        snakeImg.y * this.step,
+                        this.step,
+                        this.step
+                    );
+                }
+            }
+            //2.讓蛇動起來
+            this.move = function () {
+                this.snakeMove();
+                this.hit();
+                this.draw();
+                this.eatFood();
+            }
+            //移動蛇的位置
+            this.snakeMove = function () {
+                var snakeLength = this.snakeArr.length;
+                for (var i = snakeLength - 1; i > 0; i--) {
+                    this.snakeArr[i].x = this.snakeArr[i - 1].x;
+                    this.snakeArr[i].y = this.snakeArr[i - 1].y;
+                    this.snakeArr[i].direction = this.snakeArr[i - 1].direction;
+                }
+                switch (this.direction) {
+                    case 'left':
+                        this.snakeArr[0].x -= 1;
+                        break;
+                    case 'right':
+                        this.snakeArr[0].x += 1;
+                        break;
+                    case 'top':
+                        this.snakeArr[0].y -= 1;
+                        break;
+                    case 'bottom':
+                        this.snakeArr[0].y += 1;
+                        break;
+                }
+
+            }
+
+
+            //吃到食物
+            this.eatFood = function () {
+                if (this.snakeArr[0].x == this.foodArr[0].x && this.snakeArr[0].y == this.foodArr[0].y) {
+                    if (this.foodArr[0].cut == 'false') {
+                        this.snakeArr.push({
+                            x: this.foodArr[0].x,
+                            y: this.foodArr[0].y,
+                            img: bodyImg,
+                            direction: this.direction,
+                        });
+                    } else {
+                        this.snakeArr.splice(this.snakeArr.length - 5, 5);
+                    }
+                    this.foodArr.pop();
+                    score += 1;
+                    this.eatNumber += 1;
+                    if (this.eatNumber % 5 == 0 && this.speed >= 20) {
+                        console.log(this.speed);
+                        this.accelerate();
+                    }
+                }
+            }
+            //3.蛇死亡
+            this.hit = function () {
+
+                var leftCollision = (this.snakeArr[0].x < 0);
+                //是否與頂部的牆碰撞
+                var topCollision = (this.snakeArr[0].y < 0);
+                //是否與右邊的牆碰撞
+                var rightCollision = (this.snakeArr[0].x > this.stepW - 1);
+                //是否與底部的牆碰撞
+                var bottomCollision = (this.snakeArr[0].y > this.stepH - 1);
+                //只要上面有一個碰撞了就是true
+                var wallCollision = leftCollision || topCollision || rightCollision || bottomCollision;
+                if (wallCollision) {
+                    this.end();
+                }
+                if (this.eatNumber >= limit) {
+                    this.end();
+                }
+
+                var snakeLength = this.snakeArr.length;
+                for (var i = 1; i < snakeLength; i++) {
+                    if (this.snakeArr[0].x == this.snakeArr[i].x && this.snakeArr[0].y == this.snakeArr[i].y) {
+                        this.end();
+                        break;
+                    }
+                }
+
+            }
+            //設定按鍵事件
+            this.keypress = function (e) {
+                switch (parseInt(e)) {
+                    case 37:
+                        if (this.direction != 'right') {
+                            this.direction = 'left';
+                        }
+                        break;
+                    case 38:
+                        if (this.direction != 'bottom') {
+                            this.direction = 'top';
+                        }
+                        break;
+                    case 39:
+                        if (this.direction != 'left') {
+                            this.direction = 'right';
+                        }
+                        break;
+                    case 40:
+                        if (this.direction != 'top') {
+                            this.direction = 'bottom';
+                        }
+                        break;
+                }
+            }
+            //開始遊戲
+            this.start = function () {
+                this.draw();
+                this.interval();
+            }
+            //定時器
+            this.interval = function () {
+                var that = this;
+                this.timer = setInterval(function () {
+                    that.move();
+                }, this.speed);
+            }
+            //修改速度
+            this.accelerate = function () {
+                this.speed = Math.ceil(this.speed * 0.9);
+                clearInterval(this.timer);
+                this.interval();
+            }
+            //結束遊戲
+            //
+            this.end = function () {
+                $('#cav').hide();
+                $('#end .gold span').text(this.eatNumber);
+                $('#end').show();
+                clearInterval(this.timer);
+                if (score < limit) {
+                    retry();
+                } else {
+                    success();
+                }
+            }
+        }
+        window.onload = function () {
+            $('#cav').attr('width', $(window).width() + 'px');
+            $('#cav').attr('height', $(window).height() + 'px');
+            $('#cav').css('margin', '0 auto');
+            var snake = new Snake();
+            snake.start();
+            $(window).on('keydown', function (e) {
+                snake.keypress(e.keyCode || e.which);
+            });
+            $('.retry').click(function () {
+                location.reload();
+            });
+        }
+
+        function success() {
+           window.location.replace("./RPGSystemTest.html");
+        }
+        function retry() {
+            document.writeln('<div id = "Container" class="container"><h1>You Lose!</h1> <a href="SnakeGame.html">  <img src ="./img/Buttons/RetryButton.png" ></a ></div>');
+			var CSS=document.createElement("style");
+			CSS.setAttribute("type","text/CSS");
+			CSS.innerHTML='@import url("./css/FontSetting.css");@import url("./css/BackGroundSetting.css");h1{text-align="center";color="snow";font-family: "Shoujyo";}';
+			document.head.appendChild(CSS);
+
+        }
+
+       
+
+    </script>
+</head>
+<body>
+    <canvas id="cav"></canvas>
+    <div id="end">
+
+    </div>
+
+   
+</body>
+    </html>
+
+

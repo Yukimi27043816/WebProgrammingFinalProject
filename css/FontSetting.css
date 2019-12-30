@@ -1,0 +1,14 @@
+@charset "utf-8";
+/* CSS Document */
+@font-face{
+	font-family: 'Shoujyo';
+	src:url('../fonts/DFGirl-W7.ttf');
+}
+@font-face{
+	font-family: 'Kyokasho';
+	src:url('../fonts/UDDigiKyokashoNK-R.ttf');
+}
+@font-face{
+	font-family: 'Hymmnos';
+	src:url('../fonts/Hymmnos.ttf');
+}

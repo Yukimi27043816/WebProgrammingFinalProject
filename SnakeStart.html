@@ -1,0 +1,48 @@
+﻿<!DOCTYPE html>
+<html>
+    <head>
+    	<meta charset="utf-8">
+    	<title>SnakeStart</title>
+    	<style type="text/css">
+			@import url("./css/FontSetting.css");
+			@import url("./css/BackGroundSetting.css");
+			#Container{
+				font-family: "Kyokasho";
+				text-align: center;
+			}
+			#BG{
+				display: inherit;
+ 				position: inherit;
+    			z-index: 0;
+				width: 100vmin;
+				height:100vmin;
+			}
+			#Title{
+    			position: inherit;
+    			display: inherit;
+    			top: 20%;
+    			width: 100%;
+				height: 30vmin;
+    			color: snow;
+    			font-size:10vmin;
+			}
+			#StartButton{
+				position: inherit;
+				left: 50%;
+				transform: translateX(-50%);
+				z-index: 1;
+				top:50%;
+			}
+			#StartButton img{
+				width: 80%;
+			}
+		</style>
+    </head>
+    <body>
+    	<div id="Container" class="container">
+			<img id="BG" src="./img/Snake/SnakeBG.png" alt=""/>
+			<h1 id="Title">尋物少女雪</h1>
+			<a id="StartButton" href="./SnakeGame.html"><img src="./img/Buttons/StartButton.png"></a>
+		</div>
+	</body>
+</html>
